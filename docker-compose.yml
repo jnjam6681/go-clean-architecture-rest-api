@@ -1,0 +1,12 @@
+version: '2.4'
+
+services:
+  postgres:
+    container_name: go_todo_postgres
+    image: postgres:13.3-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "secret"
