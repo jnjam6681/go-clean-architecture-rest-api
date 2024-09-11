@@ -1,11 +1,9 @@
 package entity
 
-type Todo struct {
-	ID        int32  `json:"id"`
-	Name      string `json:"name"`
-	Completed bool   `json:"completed"`
-}
+import "gorm.io/gorm"
 
-func (t Todo) TableName() string {
-	return "todo"
+type Todo struct {
+	gorm.Model        // Adds fields 'ID', 'CreatedAt', 'UpdatedAt', 'DeletedAt'
+	Name       string `json:"name" gorm:"not null"`
+	Completed  bool   `json:"completed"`
 }

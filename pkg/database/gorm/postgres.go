@@ -2,6 +2,7 @@ package gorm
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jnjam6681/go-clean-architecture-rest-api/config"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
@@ -9,35 +10,51 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var err error
+func NewGormClient(cfg *config.Config) (*gorm.DB, error) {
+	sslmode := map[bool]string{true: "enable", false: "disable"}[cfg.Postgres.SSLMode]
 
-func ConnectionDB(c *config.Config) (*gorm.DB, error) {
-
-	fmt.Printf("host: %v\n", c.Postgres.Host)
-	fmt.Printf("post: %v\n", c.Postgres.Port)
-	fmt.Printf("username: %v\n", c.Postgres.Username)
-	fmt.Printf("password: %v\n", c.Postgres.Password)
-	fmt.Printf("dbname: %v\n", c.Postgres.Dbname)
-	fmt.Printf("sslmode: %v\n", c.Postgres.SSLMode)
-
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Postgres.Host,
-		c.Postgres.Port,
-		c.Postgres.Username,
-		c.Postgres.Password,
-		c.Postgres.Dbname,
-		c.Postgres.SSLMode,
+	dns := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Postgres.Host,
+		cfg.Postgres.Port,
+		cfg.Postgres.Username,
+		cfg.Postgres.Password,
+		cfg.Postgres.DBName,
+		sslmode,
 	)
 
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+
+	// // ตั้งค่าการจัดการ connection pool
+	// postgres, err := db.DB()
+	// if err != nil {
+	// 	log.Fatalf("Underlying database connection is not sql.DB err: %v", err)
+	// }
+	// // กำหนดค่า Max Open Connections
+	// postgres.SetMaxOpenConns(cfg.Postgres.MaxOpenConns)
+	// // กำหนดค่า Max Idle Connections (connection ที่เปิดรอแต่ยังไม่ได้ใช้)
+	// postgres.SetMaxIdleConns(cfg.Postgres.MaxIdleConns)
+	// // กำหนดเวลาชีวิตของ connection (ระยะเวลาที่ connection สามารถใช้งานได้)
+	// postgres.SetConnMaxLifetime(time.Duration(cfg.Postgres.ConnMaxLifetime) * time.Minute)
 
 	return db, nil
 }
 
-func Migrate() {
-	db.AutoMigrate(&entity.Todo{})
+func RunMigrate(db *gorm.DB) {
+	log.Print("Starting database migrations...")
+
+	// Add all model migrates here
+	modelsToMigrate := []interface{}{
+		&entity.Todo{},
+	}
+
+	for _, model := range modelsToMigrate {
+		if err := db.AutoMigrate(model); err != nil {
+			log.Fatal("Migration failed", err)
+		}
+	}
+
+	log.Print("Database migrations completed successfully")
 }

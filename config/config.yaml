@@ -1,10 +1,20 @@
+# app:
+#   port: 8080
+
+# postgres:
+#   host: localhost
+#   port: 5432
+#   username: root
+#   password: secret
+#   dbname: postgres
+#   sslmode: false
+
 app:
   port: 8080
-
 postgres:
   host: localhost
   port: 5432
-  username: root
-  password: secret
-  dbname: postgres
-  sslmode: disable
+  username: "username_go"
+  password: "password_go"
+  dbname: go_clean_architecture
+  sslmode: false

@@ -1,4 +1,4 @@
-package v1
+package http
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -8,7 +8,6 @@ import (
 func TodoSuccessResponse(data *entity.Todo) *fiber.Map {
 
 	todo := entity.Todo{
-		ID:        data.ID,
 		Name:      data.Name,
 		Completed: data.Completed,
 	}

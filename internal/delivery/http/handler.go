@@ -1,10 +1,10 @@
-package v1
+package http
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/domain"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
 )
@@ -19,11 +19,10 @@ func NewTodoHandler(usecase domain.TodoUsecase) *todoHandler {
 	}
 }
 
-func (t *todoHandler) CreateTodo(c *fiber.Ctx) error {
+func (t *todoHandler) CreateTodo(c fiber.Ctx) error {
 	var requestBody entity.Todo
 
-	err := c.BodyParser(&requestBody)
-	if err != nil {
+	if err := c.Bind().Body(&requestBody); err != nil {
 		c.Status(http.StatusBadRequest)
 		return c.JSON(TodoErrorResponse(err))
 	}
@@ -36,7 +35,7 @@ func (t *todoHandler) CreateTodo(c *fiber.Ctx) error {
 	return c.JSON(TodoSuccessResponse(result))
 }
 
-func (t *todoHandler) DeleteTodo(c *fiber.Ctx) error {
+func (t *todoHandler) DeleteTodo(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -52,7 +51,7 @@ func (t *todoHandler) DeleteTodo(c *fiber.Ctx) error {
 	return c.JSON(TodoDeleteSuccessResponse())
 }
 
-func (t *todoHandler) GetAllTodos(c *fiber.Ctx) error {
+func (t *todoHandler) GetAllTodos(c fiber.Ctx) error {
 	todo, err := t.u.GetAll(c.UserContext())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -61,7 +60,7 @@ func (t *todoHandler) GetAllTodos(c *fiber.Ctx) error {
 	return c.JSON(TodosSuccessResponse(todo))
 }
 
-func (t *todoHandler) GetTodo(c *fiber.Ctx) error {
+func (t *todoHandler) GetTodo(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -77,7 +76,7 @@ func (t *todoHandler) GetTodo(c *fiber.Ctx) error {
 	return c.JSON(TodoSuccessResponse(todo))
 }
 
-func (t *todoHandler) UpdateTodo(c *fiber.Ctx) error {
+func (t *todoHandler) UpdateTodo(c fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -86,8 +85,7 @@ func (t *todoHandler) UpdateTodo(c *fiber.Ctx) error {
 	}
 
 	var requestBody entity.Todo
-	err = c.BodyParser(&requestBody)
-	if err != nil {
+	if err := c.Bind().Body(&requestBody); err != nil {
 		c.Status(http.StatusBadRequest)
 		return c.JSON(TodoErrorResponse(err))
 	}

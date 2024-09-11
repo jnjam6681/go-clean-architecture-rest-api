@@ -1,7 +1,7 @@
-package v1
+package http
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 func TodoRouter(todoGroup fiber.Router, handler *todoHandler) {
