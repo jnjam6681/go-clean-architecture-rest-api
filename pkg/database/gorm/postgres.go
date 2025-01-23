@@ -22,27 +22,40 @@ func NewGormClient(cfg *config.Config) (*gorm.DB, error) {
 		sslmode,
 	)
 
-	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{
+		// NowFunc: func() time.Time {
+		// 	return time.Now().UTC()
+		// },
+		NowFunc: func() time.Time {
+			utc, _ := time.LoadLocation("")
+			return time.Now().In(utc)
+		},
+	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, nil, fmt.Errorf("failed to connect to PostgreSQL: %v", err)
 	}
 
-	// // ตั้งค่าการจัดการ connection pool
-	// postgres, err := db.DB()
-	// if err != nil {
-	// 	log.Fatalf("Underlying database connection is not sql.DB err: %v", err)
-	// }
-	// // กำหนดค่า Max Open Connections
-	// postgres.SetMaxOpenConns(cfg.Postgres.MaxOpenConns)
-	// // กำหนดค่า Max Idle Connections (connection ที่เปิดรอแต่ยังไม่ได้ใช้)
-	// postgres.SetMaxIdleConns(cfg.Postgres.MaxIdleConns)
-	// // กำหนดเวลาชีวิตของ connection (ระยะเวลาที่ connection สามารถใช้งานได้)
-	// postgres.SetConnMaxLifetime(time.Duration(cfg.Postgres.ConnMaxLifetime) * time.Minute)
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to retrieve SQL DB: %v", err)
+	}
 
-	return db, nil
+	if err := configureConnectionPool(sqlDB); err != nil {
+		return nil, nil, err
+	}
+
+	runMigrate(db)	
+
+	return db, func() {
+		if err := sqlDB.Close(); err != nil {
+			log.Printf("Failed to close the database connection: %v", err)
+		} else {
+			log.Println("Database connection closed successfully")
+		}
+	}, nil
 }
 
-func RunMigrate(db *gorm.DB) {
+func runMigrate(db *gorm.DB) {
 	log.Print("Starting database migrations...")
 
 	// Add all model migrates here
@@ -57,4 +70,19 @@ func RunMigrate(db *gorm.DB) {
 	}
 
 	log.Print("Database migrations completed successfully")
+}
+
+func configureConnectionPool(sqlDB *sql.DB) error {
+	// // กำหนดค่า Max Open Connections
+	// postgres.SetMaxOpenConns(cfg.Postgres.MaxOpenConns)
+	// // กำหนดค่า Max Idle Connections (connection ที่เปิดรอแต่ยังไม่ได้ใช้)
+	// postgres.SetMaxIdleConns(cfg.Postgres.MaxIdleConns)
+	// // กำหนดเวลาชีวิตของ connection (ระยะเวลาที่ connection สามารถใช้งานได้)
+	// postgres.SetConnMaxLifetime(time.Duration(cfg.Postgres.ConnMaxLifetime) * time.Minute)
+
+
+	// ตรวจสอบค่าการตั้งค่า
+	log.Printf("Database connection pool configured with MaxOpenConns: 20, MaxIdleConns: 10, ConnMaxLifetime: 5m")
+
+	return nil
 }
