@@ -18,27 +18,11 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	db, err := gorm.NewGormClient(cfg)
+	db, closeConnection, err := gorm.NewGormClient(cfg)
 	if err != nil {
-		log.Fatalf("Failed to initialize PostgreSQL connection: %v", err)
+		log.Fatal("Error initializing database:", err)
 	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatalf("Failed to retrieve SQL DB connection: %v", err)
-	}
-
-	// postgres.SetMaxIdleConns()
-	// postgres.SetConnMaxLifetime()
-	// postgres.SetConnMaxIdleTime()
-	// postgres.SetConnMaxIdleTime()
-
-	defer func() {
-		if err := sqlDB.Close(); err != nil {
-			log.Printf("Failed to close the database connection: %v", err)
-		}
-	}()
-	gorm.RunMigrate(db)
+	defer closeConnection()
 
 	todoRepo := repository.NewTodoRepository(db)
 	todoUseCase := usecase.NewTodoUsecase(todoRepo)
