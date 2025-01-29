@@ -1,8 +1,10 @@
 package gorm
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/jnjam6681/go-clean-architecture-rest-api/config"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
@@ -10,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewGormClient(cfg *config.Config) (*gorm.DB, error) {
+func NewGormClient(cfg *config.Config) (*gorm.DB, func(), error) {
 	sslmode := map[bool]string{true: "enable", false: "disable"}[cfg.Postgres.SSLMode]
 
 	dns := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -44,7 +46,7 @@ func NewGormClient(cfg *config.Config) (*gorm.DB, error) {
 		return nil, nil, err
 	}
 
-	runMigrate(db)	
+	runMigrate(db)
 
 	return db, func() {
 		if err := sqlDB.Close(); err != nil {
@@ -79,7 +81,6 @@ func configureConnectionPool(sqlDB *sql.DB) error {
 	// postgres.SetMaxIdleConns(cfg.Postgres.MaxIdleConns)
 	// // กำหนดเวลาชีวิตของ connection (ระยะเวลาที่ connection สามารถใช้งานได้)
 	// postgres.SetConnMaxLifetime(time.Duration(cfg.Postgres.ConnMaxLifetime) * time.Minute)
-
 
 	// ตรวจสอบค่าการตั้งค่า
 	log.Printf("Database connection pool configured with MaxOpenConns: 20, MaxIdleConns: 10, ConnMaxLifetime: 5m")
