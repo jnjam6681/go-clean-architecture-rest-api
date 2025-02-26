@@ -13,6 +13,24 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	GitUrl     string
+	GitCommit  string
+	JenkinsJob string
+)
+
+func LoadAbout() *About {
+	return &About{
+		Git: GitConfig{
+			Repository: GitUrl,
+			CommitId:   GitCommit,
+		},
+		Jenkins: JenkinsConfig{
+			Job: JenkinsJob,
+		},
+	}
+}
+
 type Config struct {
 	App      APPConfig      `mapstructure:"app"`
 	Postgres PostgresConfig `mapstructure:"postgres"`
