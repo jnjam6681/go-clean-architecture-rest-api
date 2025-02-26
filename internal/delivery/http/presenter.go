@@ -2,12 +2,12 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/model"
 )
 
-func TodoSuccessResponse(data *entity.Todo) *fiber.Map {
+func TodoSuccessResponse(data *model.Todo) *fiber.Map {
 
-	todo := entity.Todo{
+	todo := model.Todo{
 		Name:      data.Name,
 		Completed: data.Completed,
 	}
@@ -18,7 +18,7 @@ func TodoSuccessResponse(data *entity.Todo) *fiber.Map {
 	}
 }
 
-func TodosSuccessResponse(data *[]entity.Todo) *fiber.Map {
+func TodosSuccessResponse(data *[]model.Todo) *fiber.Map {
 	return &fiber.Map{
 		"status": true,
 		"data":   data,

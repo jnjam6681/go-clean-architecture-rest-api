@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/domain"
-	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/model"
 )
 
 type todoHandler struct {
@@ -20,7 +20,7 @@ func NewTodoHandler(usecase domain.TodoUsecase) *todoHandler {
 }
 
 func (t *todoHandler) CreateTodo(c fiber.Ctx) error {
-	var requestBody entity.Todo
+	var requestBody model.Todo
 
 	if err := c.Bind().Body(&requestBody); err != nil {
 		c.Status(http.StatusBadRequest)
@@ -84,7 +84,7 @@ func (t *todoHandler) UpdateTodo(c fiber.Ctx) error {
 		})
 	}
 
-	var requestBody entity.Todo
+	var requestBody model.Todo
 	if err := c.Bind().Body(&requestBody); err != nil {
 		c.Status(http.StatusBadRequest)
 		return c.JSON(TodoErrorResponse(err))
