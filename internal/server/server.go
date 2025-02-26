@@ -18,6 +18,8 @@ import (
 )
 
 func Run(cfg *config.Config) {
+	_ = logger.NewLogger()
+
 	db, closeConnection, err := gorm.NewGormClient(cfg)
 	if err != nil {
 		log.Fatal("Error initializing database:", err)
