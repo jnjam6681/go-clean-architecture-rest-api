@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/vault-client-go"
@@ -55,8 +56,8 @@ func LoadConfig() (*Config, error) {
 	v := viper.New()
 
 	// Allow environment variables to override config values
-	v.AutomaticEnv()
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// v.AutomaticEnv()
+	// v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if checkVaultEnv() {
 		if err := loadConfigFromVault(&cfg); err != nil {
@@ -71,13 +72,30 @@ func LoadConfig() (*Config, error) {
 	v.SetConfigType("yaml")
 
 	// Read the configuration file
+	// if err := v.ReadInConfig(); err != nil {
+	// 	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+	// 		return nil, errors.New("config file not found")
+	// 	}
+	// 	return nil, err
+	// }
+	// log.Println("Loaded config from config.yaml")
+
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Allow environment variables to override config values
+			v.AutomaticEnv()
+			v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+			// auto bind environment variables with reflection
+			if err := autoBindEnv(v, Config{}); err != nil {
+				log.Printf("Warning during auto binding: %v", err)
+			}
+		} else {
 			return nil, errors.New("config file not found")
 		}
-		return nil, err
+	} else {
+		log.Println("Loaded config from config.yaml")
 	}
-	log.Println("Loaded config from config.yaml")
 
 	// unmarshal the configuratioon into the Config struct
 	err := v.Unmarshal(&cfg)
@@ -133,4 +151,67 @@ func checkVaultEnv() bool {
 		log.Fatalf("incomplete Vault configuration: %s is missing", missing)
 	}
 	return true
+}
+
+func autoBindEnv(v *viper.Viper, cfg interface{}, prefix ...string) error {
+	cfgType := reflect.TypeOf(cfg)
+	cfgValue := reflect.ValueOf(cfg)
+
+	// Handle pointers
+	if cfgType.Kind() == reflect.Ptr {
+		cfgType = cfgType.Elem()
+		cfgValue = cfgValue.Elem()
+	}
+
+	// Only process structs
+	if cfgType.Kind() != reflect.Struct {
+		return nil
+	}
+
+	// Base path for nested keys
+	basePath := ""
+	if len(prefix) > 0 {
+		basePath = prefix[0]
+	}
+
+	// Process each field in the struct
+	for i := 0; i < cfgType.NumField(); i++ {
+		field := cfgType.Field(i)
+		fieldValue := cfgValue.Field(i)
+
+		// Skip unexported fields
+		if field.PkgPath != "" {
+			continue
+		}
+
+		// Get the key name from mapstructure tag or field name
+		key := field.Tag.Get("mapstructure")
+		if key == "" {
+			key = strings.ToLower(field.Name)
+		}
+
+		// Build the full config path
+		configPath := key
+		if basePath != "" {
+			configPath = basePath + "." + key
+		}
+
+		// Handle nested structs recursively
+		if field.Type.Kind() == reflect.Struct {
+			if err := autoBindEnv(v, fieldValue.Interface(), configPath); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Convert config path to environment variable name
+		envVar := strings.ToUpper(strings.ReplaceAll(configPath, ".", "_"))
+
+		// Bind environment variable to config path
+		if err := v.BindEnv(configPath, envVar); err != nil {
+			return fmt.Errorf("failed to bind env var %s: %w", envVar, err)
+		}
+	}
+
+	return nil
 }
