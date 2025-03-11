@@ -15,6 +15,7 @@ import (
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/repository"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/usecase"
 	"github.com/jnjam6681/go-clean-architecture-rest-api/pkg/database/gorm"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/pkg/logger"
 )
 
 func Run(cfg *config.Config) {

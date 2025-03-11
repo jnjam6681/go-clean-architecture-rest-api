@@ -18,3 +18,6 @@ postgres:
   password: "password_go"
   dbname: go_clean_architecture
   sslmode: false
+server:
+  expire_token: 15m
+  host_key: "xxxxxxx"

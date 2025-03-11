@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jnjam6681/go-clean-architecture-rest-api/config"
-	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/entity"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -62,7 +62,7 @@ func runMigrate(db *gorm.DB) {
 
 	// Add all model migrates here
 	modelsToMigrate := []interface{}{
-		&entity.Todo{},
+		&model.Todo{},
 	}
 
 	for _, model := range modelsToMigrate {

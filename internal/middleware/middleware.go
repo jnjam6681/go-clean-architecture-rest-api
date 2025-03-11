@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"go-dvm/config"
-	"go-dvm/pkg/logger"
-
+	"github.com/jnjam6681/go-clean-architecture-rest-api/config"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/pkg/logger"
 	"github.com/labstack/echo/v4"
 )
 

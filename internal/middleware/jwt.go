@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"go-dvm/internal/model"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,7 +29,7 @@ func (mw *MiddlewareManager) JWTMiddleware(next echo.HandlerFunc) echo.HandlerFu
 
 		if claims, ok := token.Claims.(*model.JWTClaims); ok && token.Valid {
 			expireToken := "30m"
-			if mw.cfg.Server.Port != "" {
+			if mw.cfg.Server.ExpireToken != "" {
 				expireToken = mw.cfg.Server.ExpireToken
 			}
 			duration, err := time.ParseDuration(expireToken)

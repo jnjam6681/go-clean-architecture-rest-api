@@ -14,27 +14,28 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	GitUrl     string
-	GitCommit  string
-	JenkinsJob string
-)
+// var (
+// 	GitUrl     string
+// 	GitCommit  string
+// 	JenkinsJob string
+// )
 
-func LoadAbout() *About {
-	return &About{
-		Git: GitConfig{
-			Repository: GitUrl,
-			CommitId:   GitCommit,
-		},
-		Jenkins: JenkinsConfig{
-			Job: JenkinsJob,
-		},
-	}
-}
+// func LoadAbout() *About {
+// 	return &About{
+// 		Git: GitConfig{
+// 			Repository: GitUrl,
+// 			CommitId:   GitCommit,
+// 		},
+// 		Jenkins: JenkinsConfig{
+// 			Job: JenkinsJob,
+// 		},
+// 	}
+// }
 
 type Config struct {
 	App      APPConfig      `mapstructure:"app"`
 	Postgres PostgresConfig `mapstructure:"postgres"`
+	Server   ServerConfig   `mapstructure:"server"`
 }
 
 type APPConfig struct {
@@ -48,6 +49,11 @@ type PostgresConfig struct {
 	Password string `mapstructure:"password"`
 	DBName   string `mapstructure:"dbname"`
 	SSLMode  bool   `mapstructure:"sslmode"`
+}
+
+type ServerConfig struct {
+	ExpireToken string `mapstructure:"expire_token"`
+	HostKey     string `mapstructure:"host_key"`
 }
 
 var cfg Config

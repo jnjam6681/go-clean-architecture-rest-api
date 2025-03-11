@@ -3,12 +3,12 @@ package utils
 import (
 	"crypto/rand"
 	"fmt"
-	"go-dvm/internal/model"
 	"math/big"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jnjam6681/go-clean-architecture-rest-api/internal/model"
 )
 
 const letterBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"

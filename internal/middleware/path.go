@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"go-dvm/pkg/utils"
 	"net/http"
 
+	"github.com/jnjam6681/go-clean-architecture-rest-api/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 )
