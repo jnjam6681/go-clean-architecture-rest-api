@@ -13,7 +13,7 @@ import (
 )
 
 func NewGormClient(cfg *config.Config) (*gorm.DB, func(), error) {
-	sslmode := map[bool]string{true: "enable", false: "disable"}[cfg.Postgres.SSLMode]
+	sslmode := map[bool]string{true: "require", false: "disable"}[cfg.Postgres.SSLMode]
 
 	dns := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Postgres.Host,
