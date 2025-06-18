@@ -140,6 +140,69 @@ func loadConfigFromVault(config *Config) error {
 	return nil
 }
 
+// func loadConfigFromVault(config *Config) error {
+// 	ctx := context.Background()
+
+// 	// Create Vault client
+// 	client, err := vault.New(
+// 		vault.WithEnvironment(),
+// 		vault.WithTLS(vault.TLSConfiguration{
+// 			InsecureSkipVerify: true,
+// 		}),
+// 		vault.WithRequestTimeout(30*time.Second),
+// 	)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create Vault client: %w", err)
+// 	}
+
+// 	// Set the token
+// 	if err := client.SetToken(os.Getenv("VAULT_TOKEN")); err != nil {
+// 		return fmt.Errorf("failed to set Vault token: %w", err)
+// 	}
+
+// 	// Load Database configuration
+// 	if err := loadSectionFromVault(ctx, client, "Dev", "apps/production", &config.Database); err != nil {
+// 		log.Printf("Warning: failed to load Database config from Vault: %v", err)
+// 	}
+// 	config.Database.Host = "localhost"
+
+// 	// Load Database configuration
+// 	if err := loadSectionFromVault(ctx, client, "Ops", "apps/production", &config.Database); err != nil {
+// 		log.Printf("Warning: failed to load Database config from Vault: %v", err)
+// 	}
+
+// 	return nil
+// }
+
+// func loadSectionFromVault(ctx context.Context, client *vault.Client, mountPath string, secretPath string, target interface{}) error {
+// 	// Read secret from KV v2
+// 	secret, err := client.Secrets.KvV2Read(ctx, secretPath, vault.WithMountPath(mountPath))
+// 	if err != nil {
+// 		return fmt.Errorf("failed to read secret from %s: %w", secretPath, err)
+// 	}
+
+// 	if secret == nil || secret.Data.Data == nil {
+// 		return fmt.Errorf("no data found at %s", secretPath)
+// 	}
+
+// 	// Use mapstructure to decode the data into the target struct
+// 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+// 		TagName:          "mapstructure",
+// 		Result:           target,
+// 		WeaklyTypedInput: true,  // Allow type conversion
+// 		ErrorUnused:      false, // Don't error on unused fields
+// 	})
+// 	if err != nil {
+// 		return fmt.Errorf("failed to create decoder: %w", err)
+// 	}
+
+// 	if err := decoder.Decode(secret.Data.Data); err != nil {
+// 		return fmt.Errorf("failed to decode data: %w", err)
+// 	}
+
+// 	return nil
+// }
+
 func checkVaultEnv() bool {
 	vaultAddr := os.Getenv("VAULT_ADDR")
 	vaultToken := os.Getenv("VAULT_TOKEN")
